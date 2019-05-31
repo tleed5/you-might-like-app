@@ -2,6 +2,7 @@
   "name": "you-might-like-app",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:8888",
   "dependencies": {
     "lodash": "^4.17.11",
     "react": "^16.8.6",

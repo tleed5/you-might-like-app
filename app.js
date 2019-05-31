@@ -1,12 +1,16 @@
 require('dotenv').config()
-const Koa = require('koa');
-const logger = require('koa-logger');
-const Router = require('koa-router');
-const app = new Koa();
+require('./config/database');
+let Koa = require('koa');
+let logger = require('koa-logger');
+let Router = require('koa-router');
+let serve = require('koa-static');
+let send = require('koa-send');
+let path = require('path');
+let app = new Koa();
 
 // log all events to the terminal
 app.use(logger());
-
+app.use(serve(path.join(__dirname, 'client/build')));
 // error handling
 app.use(async (ctx, next) => {
     try {
@@ -19,9 +23,13 @@ app.use(async (ctx, next) => {
 });
 
 const userRouter = new Router({
-    prefix: '/user'
+    prefix: '/api/user'
 });
-require('./routes/user')({ userRouter });
+require('./src/routes/user')({ userRouter });
 app.use(userRouter.routes());
 app.use(userRouter.allowedMethods());
+
+app.use(async (ctx) => { 
+    await send(ctx, path.join(__dirname, '/client/build/index.html')); 
+});
 app.listen(process.env.PORT || 8888);

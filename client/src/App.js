@@ -69,14 +69,21 @@ class ProfileInfo extends React.Component {
             user: null,
         }
     }
+    fetchTest = async() =>{
+        const response = await fetch(`/user/`)
+        console.log('response',response);
+        this.setState({ response:response.statusText })
+    }
     componentDidMount = () => {
-        spotifyApi.getMe().then(data => {
-            this.setState({ user: data.body });
-        });
+        this.fetchTest();
+        // spotifyApi.getMe().then(data => {
+        //     this.setState({ user: data.body });
+        // });
     }
     render() {
         return (
             <div>
+                {this.state.response}
                 {this.state.user ? this.state.user.display_name : 'Nope'}
             </div>
         )
