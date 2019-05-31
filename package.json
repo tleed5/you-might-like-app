@@ -1,37 +1,17 @@
 {
-  "name": "you-might-like-app",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "lodash": "^4.17.11",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1",
-    "react-spotify-login": "^0.9.1",
-    "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^0.87.1",
-    "spotify-web-api-node": "^4.0.0",
-    "universal-cookie": "^4.0.0"
-  },
+  "name": "you-might-like-api",
+  "version": "1.0.0",
+  "main": "app.js",
+  "license": "MIT",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "nodemon app.js"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "dependencies": {
+    "dotenv": "^8.0.0",
+    "koa": "^2.7.0",
+    "koa-cors": "^0.0.16",
+    "koa-logger": "^3.2.0",
+    "koa-router": "^7.4.0",
+    "spotify-web-api-node": "^4.0.0"
   }
 }

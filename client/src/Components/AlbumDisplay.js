@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card,Divider,Segment,Icon } from 'semantic-ui-react'
+import { Card,Divider,Segment,Icon,Transition } from 'semantic-ui-react'
 
 export default  class AlbumDisplay extends React.Component {
 
@@ -17,13 +17,14 @@ export default  class AlbumDisplay extends React.Component {
                 extra={<a onClick={(e) => this.handleClick(album.id, e)}><Icon name='remove'/>Remove</a>}
             />
         );
+        let divider = albums.length > 0 ? <Divider horizontal inverted>Since you like...</Divider> : <Divider horizontal inverted></Divider>;
         return (
             <div>
-                <Divider horizontal inverted>Since you like...</Divider>
+                {divider}
                 <Segment inverted>
-                    <Card.Group centered itemsPerRow={3}> 
+                    <Transition.Group as={Card.Group} centered itemsPerRow={3} duration={1000} size='huge'>
                         {listItems}
-                    </Card.Group>
+                    </Transition.Group>
                 </Segment>
             </div>
         )
