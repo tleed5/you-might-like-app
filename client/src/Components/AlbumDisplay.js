@@ -8,15 +8,17 @@ export default  class AlbumDisplay extends React.Component {
     }
     render(){
         let albums = this.props.albums;
-        const listItems = albums.map((album) =>
-            <Card
+        const listItems = albums.map((album) => {
+            let description = album.genres ? album.genres.join(', ') : album.artist.name;
+
+            return <Card
                 key={album.id}
-                image={album.image}
-                header={album.title}
-                description={album.description}
+                image={album.images[0].url}
+                header={album.name}
+                description={description}
                 extra={<a onClick={(e) => this.handleClick(album.id, e)}><Icon name='remove'/>Remove</a>}
             />
-        );
+        });
         let divider = albums.length > 0 ? <Divider horizontal inverted>Since you like...</Divider> : <Divider horizontal inverted></Divider>;
         return (
             <div>

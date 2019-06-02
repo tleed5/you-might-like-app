@@ -1,45 +1,30 @@
 import React from 'react';
-import './App.css';
-import Cookies from 'universal-cookie';
 import AlbumController from './Components/AlbumController';
 import LoginController from './Components/LoginController';
-import { Container} from 'semantic-ui-react'
-
-var SpotifyWebApi = require('spotify-web-api-node');
-
-const cookies = new Cookies();
-const clientId = process.env.REACT_APP_SPOTIFY_CLIENT;
-
-const redirectUri = "http://localhost:3000";
-const spotifyApi = new SpotifyWebApi({
-    clientId: clientId,
-    redirectUri: redirectUri
-});
+import {Container, Menu,Icon,Modal,Header,Button} from 'semantic-ui-react'
+import './App.css';
 
 class App extends React.Component {
     constructor(props) {
         super(props);
-        let token = cookies.get('authToken') ? cookies.get('authToken') : false;
-        let isLoggedIn = false;
-        if (token) {
-            spotifyApi.setAccessToken(token);
-            isLoggedIn = true;
-        }
+        let isLoggedIn = true;
         this.state = {
-            token: token,
             isLoggedIn:isLoggedIn,
-            searchRes: null
+            aboutOpen:false,
         };
     }
-    handleLogin = (token) =>{
-        let expiry = new Date();
-        expiry.setTime(expiry.getTime() + (1 * 60 * 60 * 1000));
-        cookies.set('authToken', token.access_token, { path: '/', expires: expiry });
-        spotifyApi.setAccessToken(token.access_token);
+
+    //TODO create a session for the user
+    handleLogin = () =>{
         this.setState({
-            token:token.access_token, 
             isLoggedIn:true
         });
+    }
+    handleOpenAbout = (e)=>{
+        this.setState({aboutOpen:true})
+    }
+    handleCloseAbout = (e)=>{
+        this.setState({aboutOpen:false})
     }
     render() {
         const isLoggedIn = this.state.isLoggedIn;
@@ -47,44 +32,36 @@ class App extends React.Component {
         if (isLoggedIn) {
             view = 
                 <Container>
-                    <ProfileInfo />
-                    <AlbumController spotify={spotifyApi}/>
+                    <AlbumController/>
                 </Container>
         } else {
-            view = <LoginController onLogin={this.handleLogin} />
+            view = <LoginController onLogin={this.handleLogin} isLoggedIn={this.state.isLoggedIn} />
         }
         return (
             <div className="App">
+                <Menu icon inverted borderless size='massive'>
+                    <Menu.Item header>You Might Like App</Menu.Item>
+                    <Menu.Item link href='https://github.com/Zyruis11/you-might-like-app' name='github'>
+                        <Icon name='github' />
+                    </Menu.Item>
+                    <Menu.Item link name='about' onClick={(e)=>this.handleOpenAbout(e)}>
+                        <Icon name='question circle outline' />
+                    </Menu.Item>
+                </Menu>
                 {view}
-            </div>
-        )
-    }
-}
-
-
-class ProfileInfo extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            user: null,
-        }
-    }
-    fetchTest = async() =>{
-        const response = await fetch(`/user/`)
-        console.log('response',response);
-        this.setState({ response:response.statusText })
-    }
-    componentDidMount = () => {
-        this.fetchTest();
-        // spotifyApi.getMe().then(data => {
-        //     this.setState({ user: data.body });
-        // });
-    }
-    render() {
-        return (
-            <div>
-                {this.state.response}
-                {this.state.user ? this.state.user.display_name : 'Nope'}
+                <Modal open={this.state.aboutOpen} basic size='small' onClose={this.handleCloseAbout}>
+                    <Header icon='question circle outline' content='About' />
+                    <Modal.Content>
+                    <p>
+                        Stuff about me and this softwaaaaaare
+                    </p>
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button color='green' inverted  onClick={(e)=>this.handleCloseAbout(e)}>
+                            <Icon name='close' /> Close
+                        </Button>
+                    </Modal.Actions>
+                </Modal>
             </div>
         )
     }
