@@ -173,8 +173,42 @@ module.exports = {
             console.error(err);
         }
     },
-    async getRecommendationPlaylist(){
+    async getRecommendationPlaylist(artistSeeds,trackSeeds,genreSeeds){
         //TODO creates a playlist based on seeded data
+        if(!this.isAuthenticated){
+            await this.authenticate();
+        }
+        let recommendation = await spotifyApi.getRecommendations({seed_artists:artistSeeds});
+        recommendation = recommendation.body['tracks'].map(track=>{
+            return {
+                id:track.id,
+                name:track.name,
+                album: {
+                    id:track.album.id,
+                    name:track.album.name,
+                    uri:track.album.uri,
+                    url:track.album.external_urls,
+                    images:track.album.images
+                },
+                artist:{
+                    id:track.artists[0].id,
+                    name: track.artists[0].name,
+                    uri:track.artists[0].uri,
+                    url: track.artists[0].external_urls
+                },
+                preview_url:track.preview_url,
+                url: track.external_urls,
+                uri: track.uri,
+                type:'track',
+            }
+        })
+        return {
+            body:{
+                recommendation:recommendation
+            },
+            trackCount:recommendation.length,
+            statusCode:200,
+        }
         //Uses the spotify https://developer.spotify.com/documentation/web-api/reference/browse/get-recommendations/
     }
 }

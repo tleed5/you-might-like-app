@@ -1,6 +1,10 @@
 .App {
-  text-align: center;
+  /* text-align: center; */
+}
+.track-background{
+    background-color: rgba(1, 1, 1, 0.65);
+    color:white;
 }
 .full-width-search > .input{
-    width:85%;
+    width:100%;
 }

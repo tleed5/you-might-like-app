@@ -3,25 +3,30 @@ import AlbumSearch from './AlbumSearch';
 import AlbumList from './AlbumList';
 import AlbumDisplay from './AlbumDisplay';
 import PlaylistSearch from './PlaylistSearch';
+import RecomendationList from './RecommendationList';
 import _ from 'lodash';
 import AwesomeDebouncePromise from 'awesome-debounce-promise';
 
-import { Segment,Icon,Header,Dimmer,Loader} from 'semantic-ui-react'
+import { Segment,Icon,Header,Dimmer,Loader,Button,Grid} from 'semantic-ui-react'
 
 const getRelatedApi = async(query) => fetch('/api/main/getRelated?artists='+encodeURI(query));
 const getRelatedDebounce = AwesomeDebouncePromise(getRelatedApi,500);
+
+const getRecomendationApi = async(query) => fetch('/api/main/getRecommendation?artists='+encodeURI(query));
 
 export default class AlbumController extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            loading:false,
+            loadingAlbums:false,
+            loadingRecomendations:false,
             relatedAlbums:[],
+            recommendation:[],
             selected:[],
         };
     }
     getRelated = async() =>{
-        this.setState({loading:true});
+        this.setState({loadingAlbums:true});
         let selectedIds = this.state.selected.map(e=>{
             if(e.type === 'album') return e.artist.id;
 
@@ -30,7 +35,18 @@ export default class AlbumController extends React.Component {
         const relatedRes = await getRelatedDebounce(selectedIds.join(','));
         const parsed = await relatedRes.json();
         let relatedAlbums = _.uniqBy(parsed.body.albums,'id');
-        this.setState({relatedAlbums:relatedAlbums,loading:false});
+        this.setState({relatedAlbums:relatedAlbums,loadingAlbums:false});
+    }
+    getRecomendation = async() =>{
+        this.setState({loadingRecomendations:true});
+        let relatedAlbums = this.state.relatedAlbums;
+        let artistIds = _.map(relatedAlbums,'artist.id');
+        if(artistIds.length > 5){
+            artistIds = _.sampleSize(artistIds,5);
+        }
+        const recommendation = await getRecomendationApi(artistIds);
+        const parsed = await recommendation.json();
+        this.setState({recommendation:parsed.body.recommendation,loadingRecomendations:false});
     }
     handleSearchResult = async (result) =>{
         let selected = this.state.selected;        
@@ -66,26 +82,59 @@ export default class AlbumController extends React.Component {
         let noAlbums;
         let relatedAlbums = this.state.relatedAlbums;
         let hasAlbums = relatedAlbums.length > 0;
+        let recommendation = this.state.recommendation;
+        let hasRecommendation = recommendation.length > 0;
+        let albumListSize = hasRecommendation ? 10 : 16;
+        let playlist;
+        if(hasRecommendation){
+            playlist = 
+            <Grid.Column>
+                <RecomendationList recommendation={recommendation}/>
+            </Grid.Column>
+        }
         if(!hasAlbums){
             noAlbums = 
-                <Segment inverted>
-                    <Dimmer inverted active={this.state.loading}>
-                        <Loader inverted active={this.state.loading}></Loader>
+                <Segment basic>
+                    <Dimmer inverted active={this.state.loadingAlbums}>
+                        <Loader inverted active={this.state.loadingAlbums}></Loader>
                     </Dimmer>
-                    <Header icon>
+                    <Header inverted textAlign='center' icon>
                         <Icon name='search' />
-                        You haven't searched for an album yet!
+                        Try Searching for an Artist Or Album!
                     </Header>
                 </Segment>
         }
-        
         return (
             <div>
-                <AlbumSearch onSearchResult={this.handleSearchResult}/>
-                <AlbumDisplay albums={this.state.selected} onAlbumRemove={this.handleRemoveAlbum}/>
-                {/* <PlaylistSearch spotify={this.props.spotify}/> */}
-                {noAlbums}
-                <AlbumList albums={relatedAlbums} onAddToList={this.handleAddToList}/>
+                <Grid columns='equal' stackable doubling divided inverted padded>
+                    <Grid.Row centered>
+                        <Grid.Column width={10}>
+                            <AlbumSearch onSearchResult={this.handleSearchResult}/>
+                        </Grid.Column>
+                        <Grid.Column>
+                            <Button basic inverted color='green' animated fluid disabled={!hasAlbums} onClick={this.getRecomendation} loading={this.state.loadingRecomendations}>
+                                <Button.Content visible>Get Reccomendation Playlist</Button.Content>
+                                <Button.Content hidden>
+                                    <Icon name='arrow right' />
+                                </Button.Content>
+                            </Button>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row centered>
+                        <Grid.Column width={16}>
+                            <AlbumDisplay albums={this.state.selected} onAlbumRemove={this.handleRemoveAlbum}/>
+                        </Grid.Column>
+                        
+                    </Grid.Row>
+                    <Grid.Row centered>
+                        <Grid.Column width={albumListSize}>
+                            <AlbumList albums={relatedAlbums} onAddToList={this.handleAddToList} hasRecommendation={hasRecommendation}/>
+                            {noAlbums}
+                        </Grid.Column>
+                        {playlist}
+                    </Grid.Row>
+                    {/* <PlaylistSearch spotify={this.props.spotify}/> */}
+                </Grid>
             </div>
         )
     }

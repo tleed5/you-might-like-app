@@ -10,7 +10,10 @@ module.exports = ({ mainRouter }) => {
     });
     mainRouter.get('/getRelated',async(ctx,next)=>{
         let artistIds = ctx.query.artists.split(',');
-        ctx.body = await(spotifyService.getRelated(artistIds));
-
+        ctx.body = await spotifyService.getRelated(artistIds);
+    });
+    mainRouter.get('/getRecommendation',async(ctx,next)=>{
+        let artistSeeds = ctx.query.artists.split(',');
+        ctx.body = await spotifyService.getRecommendationPlaylist(artistSeeds);
     });
 };

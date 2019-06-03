@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search } from 'semantic-ui-react';
+import { Search,Input } from 'semantic-ui-react';
 import _ from 'lodash';
 import AwesomeDebouncePromise from 'awesome-debounce-promise';
 const initialState = { isLoading: false, results: [], value: '' }
@@ -53,7 +53,7 @@ export default class AlbumSearch extends React.Component {
         return (
             <Search
                 fluid
-                size={'big'}
+                centered
                 className={'full-width-search'}
                 loading={isLoading}
                 onResultSelect={this.handleResultSelect}

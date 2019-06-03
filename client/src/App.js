@@ -7,7 +7,7 @@ import './App.css';
 class App extends React.Component {
     constructor(props) {
         super(props);
-        let isLoggedIn = true;
+        let isLoggedIn = false;
         this.state = {
             isLoggedIn:isLoggedIn,
             aboutOpen:false,
@@ -39,7 +39,7 @@ class App extends React.Component {
         }
         return (
             <div className="App">
-                <Menu icon inverted borderless size='massive'>
+                <Menu icon inverted secondary borderless>
                     <Menu.Item header>You Might Like App</Menu.Item>
                     <Menu.Item link href='https://github.com/Zyruis11/you-might-like-app' name='github'>
                         <Icon name='github' />
@@ -47,6 +47,13 @@ class App extends React.Component {
                     <Menu.Item link name='about' onClick={(e)=>this.handleOpenAbout(e)}>
                         <Icon name='question circle outline' />
                     </Menu.Item>
+                    <Menu.Menu position='right'>
+                        <Menu.Item>
+                            <Button color='green' basic inverted>
+                                <Icon name='spotify' /> Login With Spotify
+                            </Button>
+                        </Menu.Item>
+                    </Menu.Menu>
                 </Menu>
                 {view}
                 <Modal open={this.state.aboutOpen} basic size='small' onClose={this.handleCloseAbout}>

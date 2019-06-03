@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimmer, Header, Icon,Button } from 'semantic-ui-react'
+import { Dimmer, Header, Icon,Button,Segment } from 'semantic-ui-react'
 
 export default class LoginController extends React.Component {
     constructor(props) {
@@ -18,10 +18,15 @@ export default class LoginController extends React.Component {
                 <Header as='h2' icon inverted>
                     <Icon name='heart' />
                     Time to find some new jams!
-                    <Header.Subheader>
-                        <Button basic color='teal' onClick={(e) => this.loginSuccess(e)}>Continue</Button>
-                    </Header.Subheader>
                 </Header>
+                <Header.Subheader>
+                    <Button color='green' basic inverted>
+                            <Icon name='spotify' /> Login With Spotify
+                    </Button>
+                </Header.Subheader>
+                <Segment basic textAlign='center'>
+                    <Button basic inverted color='teal' onClick={(e) => this.loginSuccess(e)}>Continue Without Logging In</Button>
+                </Segment>
             </Dimmer> 
         )
     }

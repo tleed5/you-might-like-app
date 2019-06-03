@@ -42,14 +42,14 @@ export default class AlbumList extends React.Component {
     }
     render(){
         let albums = this.props.albums;
-        let divider = albums.length > 0 ? <Divider horizontal inverted>You might like...</Divider> : <Divider horizontal inverted></Divider>;
+        let divider = albums.length > 0 ? <Divider horizontal inverted>You might like</Divider> : <Divider horizontal inverted></Divider>;
         const colors = ['red','blue','yellow','orange','olive','green','teal','violet','purple','pink'];
-
+        let columnCount = this.props.hasRecommendation ? 3 : 5;
         const listItems = albums.map((album) =>{
             let artist = album.artist ? album.artist.name : '';
             let image = album.images && album.images.length > 0 ? album.images[0].url : '';
 
-            return <Card key={album.id} color={_.sample(colors)}>                
+            return <Card raised key={album.id} color={_.sample(colors)}>                
                 <Dimmer.Dimmable dimmed={album.isPlaying}  onClick={(e)=>this.handleAlbumClick(album,e)}>
                     <Image src={image}/>
                     <Dimmer active={album.isPlaying} >
@@ -59,7 +59,7 @@ export default class AlbumList extends React.Component {
                         </Header>
                     </Dimmer>
                 </Dimmer.Dimmable>
-                <Card.Content>
+                <Card.Content textAlign={'center'}>
                     <Card.Header>{album.name}</Card.Header>
                     <Card.Meta>
                         <span className='date'>{artist}</span>
@@ -84,9 +84,9 @@ export default class AlbumList extends React.Component {
         return (
             <div>
                 {divider}
-                <Segment inverted>
+                <Segment basic>
                     {player}
-                    <Transition.Group centered stackable as={Card.Group} animation={'fade down'} duration={1000} itemsPerRow={4}>
+                    <Transition.Group centered stackable as={Card.Group} animation={'fade down'} duration={1000} itemsPerRow={columnCount}>
                         {listItems}
                     </Transition.Group>
                 </Segment>
