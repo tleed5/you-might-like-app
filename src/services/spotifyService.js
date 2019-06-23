@@ -1,11 +1,11 @@
 const SpotifyWebApi = require('spotify-web-api-node');
 const _ = require('lodash')
+const userController = require('../controllers/userController');
 
-const scopes = ['user-read-private', 'user-read-email'];
-const redirectUri = 'http://localhost:8888/user/auth';
+const scopes = ['user-read-private', 'user-read-email','playlist-modify-public'];
+const redirectUri = 'http://localhost:3000/auth';
 const clientId = process.env.SPOTIFY_CLIENT;
 const secret = process.env.SPOTIFY_SECRET;
-const state = 'some-state-of-my-choice';
 const spotifyApi = new SpotifyWebApi({
     redirectUri: redirectUri,
     clientId: clientId,
@@ -15,12 +15,29 @@ const spotifyApi = new SpotifyWebApi({
 module.exports = {
     isAuthenticated: false,
 
+    //TODO generate state here
     getLoginUrl() {
-        return spotifyApi.createAuthorizeURL(scopes, state);
+        let crypto = require("crypto");
+        let state = crypto.randomBytes(20).toString('hex');
+        return {
+            body:{
+                url:spotifyApi.createAuthorizeURL(scopes,state),
+            }
+        }
     },
     //Creates a user authentication token.
-    async createUserTokens() {
-        let data = await spotifyApi.authorizationCodeGrant(authCode);
+    //Check that state and redirect uri is correct
+    async createUserTokens(authCode) {
+        try{
+            let data = await spotifyApi.authorizationCodeGrant(authCode);
+            console.log('userToekns',authCode);
+            return {
+                access_token:data.body['access_token'],
+                refresh_token:data.body['refresh_token'],
+            }
+        }catch(err){
+            console.error(err);
+        }
     },
     //Authenticates a user using their ID.
     async authenticateUser(id) {
@@ -39,9 +56,42 @@ module.exports = {
             this.isAuthenticated = false;
         }, data.body['expires_in'] * 1000); 
     },
-    async getCurrentUser() {
-        let me = await spotifyApi.getUser('zyruis');
-        console.log(me)
+    async refreshToken(accessToken,refreshToken){
+        try{
+            spotifyApi.setAccessToken(accessToken);
+            spotifyApi.setRefreshToken(refreshToken);
+            let data = await spotifyApi.refreshAccessToken();
+            spotifyApi.resetAccessToken();
+            spotifyApi.resetRefreshToken();
+            return {
+                access_token:data.body['access_token'],
+                refresh_token:data.body['refresh_token'],
+            }
+        }catch(err){
+            console.error(err);
+        }
+    },
+    async getCurrentUser(userToken) {
+        try{
+            let foundUser = await userController.GetUser(userToken);
+            let user;
+            if(foundUser){
+                let newTokens = await this.refreshToken(foundUser.access_token,foundUser.refresh_token);
+                spotifyApi.setAccessToken(newTokens.access_token);
+                foundUser.access_token = newTokens.access_token;
+                foundUser.refresh_token = newTokens.refresh_token;
+                user = await spotifyApi.getMe();
+                await foundUser.save();
+            }else{
+                spotifyApi.setAccessToken(userToken);
+                user = await spotifyApi.getMe();
+                spotifyApi.resetAccessToken();
+            }
+            this.isAuthenticated=false;
+            return user.body;
+        }catch(err){
+            console.error(err);
+        }
     },
 
     async search(query) {
@@ -210,5 +260,24 @@ module.exports = {
             statusCode:200,
         }
         //Uses the spotify https://developer.spotify.com/documentation/web-api/reference/browse/get-recommendations/
-    }
+    },
+
+    // async savePlaylist(userToken,trackIds){
+    //     try{
+    //         let foundUser = await userController.GetUser(userToken);
+    //         console.log('foundUser',foundUser)
+    //         if(!foundUser)
+    //             return false;
+
+    //         let newTokens = await this.refreshToken(foundUser.access_token,foundUser.refresh_token);
+
+    //         spotifyApi.setAccessToken(newTokens.access_token);
+    //         let newPlaylist = await spotifyApi.createPlaylist(user.id,'Blah Blah');
+    //         spotifyApi.resetAccessToken();
+    //         console.log(newPlaylist);
+    //         return true;
+    //     }catch(err){
+    //         console.error(err);
+    //     }
+    // }
 }

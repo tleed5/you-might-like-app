@@ -5,13 +5,15 @@ logger = require('koa-logger'),
 router = require('koa-router'),
 serve = require('koa-static'),
 send = require('koa-send'),
-path = require('path');
+path = require('path'),
+bodyParser= require('koa-bodyparser');
 
 let app = new koa();
 
 // log all events to the terminal
 app.use(logger());
 app.use(serve(path.join(__dirname, 'client/build')));
+app.use(bodyParser());
 // error handling
 app.use(async (ctx, next) => {
     try {
@@ -38,6 +40,10 @@ app.use(userRouter.routes());
 app.use(userRouter.allowedMethods());
 
 app.use(async (ctx) => { 
-    await send(ctx, path.join(__dirname, '/client/build/index.html')); 
+    try {
+        await send(ctx,ctx.path,{ root: __dirname + '/client/build/index.html' }); 
+    }catch(err){
+        
+    }
 });
 app.listen(process.env.PORT || 8888);
