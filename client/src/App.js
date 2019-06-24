@@ -63,30 +63,30 @@ class App extends React.Component {
                     <AlbumController/>
                 </Container>
             if(user){
-                console.log(user)
-                let userImage = user.images[0].url;
-                loginButton=
-                <Menu.Menu position='right'>
-                    <Button color='green' basic inverted animated onClick={(e) => this.handleLogout()}>                        
-                        <Button.Content visible>
-                            <Image src={userImage} avatar />
-                            {user.id}
-                        </Button.Content>
-                        <Button.Content hidden>
-                            Logout?
-                        </Button.Content>
-                    </Button>
-                </Menu.Menu>
+                // console.log(user)
+                // let userImage = user.images[0].url;
+                // loginButton=
+                // <Menu.Menu position='right'>
+                //     <Button color='green' basic inverted animated onClick={(e) => this.handleLogout()}>                        
+                //         <Button.Content visible>
+                //             <Image src={userImage} avatar />
+                //             {user.id}
+                //         </Button.Content>
+                //         <Button.Content hidden>
+                //             Logout?
+                //         </Button.Content>
+                //     </Button>
+                // </Menu.Menu>
             }
         } else {
             view = <LoginController onLogin={this.handleLogin} isLoggedIn={this.state.isLoggedIn} />
-            loginButton = <Menu.Menu position='right'>
-                        <Menu.Item>
-                            <Button color='green' basic inverted>
-                                <Icon name='spotify' /> Login With Spotify
-                            </Button>
-                        </Menu.Item> 
-                    </Menu.Menu>
+            // loginButton = <Menu.Menu position='right'>
+            //             <Menu.Item>
+            //                 <Button color='green' basic inverted>
+            //                     <Icon name='spotify' /> Login With Spotify
+            //                 </Button>
+            //             </Menu.Item> 
+            //         </Menu.Menu>
         }
         return (
             <div className="App">

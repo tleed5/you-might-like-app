@@ -52,9 +52,9 @@ export default class LoginController extends React.Component {
                     Time to find some new jams!
                 </Header>
                 <Header.Subheader>
-                    <Button color='green' basic inverted onClick={(e) => this.handleLogin(e)}>
+                    {/* <Button color='green' basic inverted onClick={(e) => this.handleLogin(e)}>
                             <Icon name='spotify' /> Login With Spotify
-                    </Button>
+                    </Button> */}
                 </Header.Subheader>
                 <Segment basic textAlign='center'>
                     <Button basic inverted color='teal' onClick={(e) => this.loginSuccess(e)}>Continue Without Logging In</Button>
