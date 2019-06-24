@@ -1,42 +1,50 @@
 import React from 'react';
-import { Search } from 'semantic-ui-react';
+import { Search,Input } from 'semantic-ui-react';
 import _ from 'lodash';
-
+import AwesomeDebouncePromise from 'awesome-debounce-promise';
 const initialState = { isLoading: false, results: [], value: '' }
 
+const searchApi = async(query) => fetch('/api/main/search?query='+encodeURIComponent(query));
+const search = AwesomeDebouncePromise(searchApi,500);
 export default class AlbumSearch extends React.Component {
     constructor(props) {
         super(props);
         this.state = initialState
     }
     handleResultSelect = (e, { result }) => {
-        this.props.onSearchResult(result);
+        this.props.onSearchResult(result.data);
         this.setState({ value: result.title });
-    }
-    timeout(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
     }
     handleSearchChange = async (e, { value }) => {
         this.setState({ isLoading: true, value });
         if(value.length === 0) this.setState(initialState);
-        await this.timeout(500);
-        let spotify = this.props.spotify;
-        let albums = await spotify.searchAlbums(this.state.value,{limit:5});
-        albums = albums.body.albums.items.map(album=>{
-            return {
-                id:album.artists[0].id+','+album.name,
-                title:album.name + ' - ' + album.artists[0].name,
-                description: album.release_date,
-                image:album.images[0].url,
-            }
+        const searchRes = await search(value);
+        const parsed = await searchRes.json();
+        
+        let results = _.flatMap(parsed.body,(element)=>{
+           return element; 
         });
-        albums = _.uniqBy(albums, 'id');
-        const re = new RegExp(_.escapeRegExp(this.state.value), 'i');
-        const isMatch = albums => re.test(albums.title);
-        let filtered =  _.filter(albums, isMatch);
+        results = results.map(e=>{
+            let artist = e.artist ? e.artist.name : '';
+            let description = e.genres ? e.genres.join(', ') : artist;
+            let image = e.images && e.images.length > 0 ? e.images[0].url : '';
+            return {
+                id:e.id,
+                key:e.id,
+                title:e.name,
+                image:image,
+                description:description,
+                data:e,
+            };
+        });
+        if (this.state.value.length < 1) return this.setState(initialState)
+
+        const re = new RegExp(_.escapeRegExp(this.state.value), 'i')
+        const isMatch = result => re.test(result.title)
+
         this.setState({
             isLoading: false,
-            results: filtered,
+            results: _.filter(results, isMatch),
         });
     }
 
@@ -45,13 +53,11 @@ export default class AlbumSearch extends React.Component {
         return (
             <Search
                 fluid
-                size={'big'}
+                centered
                 className={'full-width-search'}
                 loading={isLoading}
                 onResultSelect={this.handleResultSelect}
-                onSearchChange={_.debounce(this.handleSearchChange, 500, {
-                    leading: true,
-                })}
+                onSearchChange={this.handleSearchChange}
                 results={results}
                 value={value}
                 minCharacters={3}
